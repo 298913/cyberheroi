@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberHerói — Treinamento de Conscientização</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+  :root {
+    --bg: #0f0e17; --surface: #1a1a2e; --card: #16213e;
+    --a1: #ff6b6b; --a2: #ffd93d; --a3: #6bcb77; --a4: #4d96ff; --a5: #c77dff;
+    --text: #fffffe; --muted: #a7a9be; --r: 16px; --rs: 8px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+  .screen { display:none; min-height:100vh; }
+  .screen.active { display:flex; flex-direction:column; }
+
+  /* INTRO */
+  #si { align-items:center; justify-content:center; text-align:center; padding:32px 24px;
+    background:radial-gradient(ellipse at 60% 0%,#1a0a3c 0%,var(--bg) 60%); position:relative; overflow:hidden; }
+  .stars { position:absolute; inset:0; pointer-events:none;
+    background-image:radial-gradient(1px 1px at 20% 30%,#fff 1px,transparent 0),
+      radial-gradient(1px 1px at 80% 10%,#fff 1px,transparent 0),
+      radial-gradient(1px 1px at 50% 60%,rgba(255,255,255,.5) 1px,transparent 0),
+      radial-gradient(1px 1px at 10% 70%,#fff 1px,transparent 0),
+      radial-gradient(1px 1px at 90% 80%,rgba(255,255,255,.6) 1px,transparent 0),
+      radial-gradient(1px 1px at 35% 85%,#fff 1px,transparent 0);
+    background-size:400px 400px; }
+  .ibadge { font-size:72px; margin-bottom:16px; animation:float 3s ease-in-out infinite; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+  .ititle { font-size:36px; font-weight:900; line-height:1.1; margin-bottom:8px;
+    background:linear-gradient(135deg,var(--a4),var(--a5)); -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent; background-clip:text; }
+  .isub { font-size:13px; color:var(--muted); margin-bottom:32px; letter-spacing:.05em; text-transform:uppercase; }
+  .idesc { max-width:400px; font-size:16px; color:var(--muted); line-height:1.6; margin:0 auto 32px; }
+  .chips { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:36px; }
+  .chip { padding:7px 14px; border-radius:999px; font-size:13px; font-weight:700; }
+  .btnp { background:linear-gradient(135deg,var(--a4),var(--a5)); color:#fff; border:none;
+    padding:18px 48px; border-radius:999px; font-size:18px; font-weight:800; cursor:pointer;
+    font-family:'Nunito',sans-serif; transition:transform .15s,box-shadow .15s;
+    box-shadow:0 8px 32px rgba(77,150,255,.35); }
+  .btnp:hover { transform:translateY(-2px); box-shadow:0 12px 40px rgba(77,150,255,.5); }
+
+  /* MAP */
+  #sm { padding:24px 20px 40px; background:radial-gradient(ellipse at 30% 0%,#0a1628 0%,var(--bg) 70%); }
+  .mh { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; }
+  .mt { font-size:22px; font-weight:900; }
+  .xpw { text-align:right; }
+  .xpl { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
+  .xpbg { width:120px; height:8px; background:rgba(255,255,255,.1); border-radius:999px; overflow:hidden; }
+  .xpf { height:100%; background:linear-gradient(90deg,var(--a4),var(--a5)); border-radius:999px; transition:width .6s ease; }
+  .xpc { font-size:12px; font-weight:700; color:var(--a4); margin-top:4px; }
+  .mgrid { display:flex; flex-direction:column; gap:16px; max-width:480px; margin:0 auto; }
+  .mcard { background:var(--card); border-radius:var(--r); padding:20px; display:flex;
+    align-items:center; gap:16px; cursor:pointer; border:2px solid transparent;
+    transition:border-color .2s,transform .15s,box-shadow .2s; position:relative; overflow:hidden; }
+  .mcard::before { content:''; position:absolute; top:0;left:0;right:0;height:3px; border-radius:var(--r) var(--r) 0 0; }
+  .mcard.unlocked:hover { transform:translateX(6px); box-shadow:-4px 0 24px rgba(77,150,255,.2); }
+  .mcard.locked { opacity:.4; cursor:not-allowed; }
+  .mcard.done { border-color:rgba(107,203,119,.3); }
+  .mcard.done::before { background:var(--a3) !important; }
+  .micon { width:56px;height:56px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:28px; flex-shrink:0; }
+  .minfo { flex:1; }
+  .mnum { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-bottom:2px; }
+  .mname { font-size:17px; font-weight:800; margin-bottom:4px; }
+  .mdesc { font-size:13px; color:var(--muted); line-height:1.4; }
+  .mmeta { display:flex; align-items:center; gap:8px; margin-top:8px; }
+  .mtag { font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; }
+  .marr { font-size:20px; opacity:.4; }
+
+  /* Colors per mission */
+  .m1::before{background:var(--a4)!important} .m1 .micon{background:rgba(77,150,255,.2)} .m1 .mtag{background:rgba(77,150,255,.2);color:var(--a4)}
+  .m2::before{background:var(--a1)!important} .m2 .micon{background:rgba(255,107,107,.2)} .m2 .mtag{background:rgba(255,107,107,.2);color:var(--a1)}
+  .m3::before{background:var(--a3)!important} .m3 .micon{background:rgba(107,203,119,.2)} .m3 .mtag{background:rgba(107,203,119,.2);color:var(--a3)}
+  .m4::before{background:var(--a2)!important} .m4 .micon{background:rgba(255,217,61,.2)} .m4 .mtag{background:rgba(255,217,61,.2);color:var(--a2)}
+  .pxp{background:rgba(199,125,255,.2);color:var(--a5)}
+
+  /* STORY */
+  #ss { padding:0; background:var(--bg); }
+  .sh { padding:16px 20px; background:rgba(0,0,0,.4); display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(255,255,255,.06); }
+  .backbtn { background:rgba(255,255,255,.08); border:none; color:var(--text); width:36px;height:36px; border-radius:50%; cursor:pointer; font-size:18px; display:flex;align-items:center;justify-content:center; transition:background .15s; }
+  .backbtn:hover{background:rgba(255,255,255,.15)}
+  .smi{flex:1} .smt{font-size:16px;font-weight:800} .sms{font-size:12px;color:var(--muted)}
+  .spw{width:80px} .spb{height:4px;background:rgba(255,255,255,.1);border-radius:999px;overflow:hidden} .spf{height:100%;border-radius:999px;transition:width .4s ease}
+  .scene { flex:1; padding:28px 20px; display:flex; flex-direction:column; gap:16px; max-width:520px; margin:0 auto; width:100%; }
+  .sill { background:var(--card); border-radius:var(--r); padding:24px; text-align:center; font-size:56px; line-height:1; position:relative; overflow:hidden; }
+  .sill::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,rgba(77,150,255,.12),transparent 70%);pointer-events:none}
+  .semoji{animation:float 2.5s ease-in-out infinite;display:block;margin-bottom:8px}
+  .sctx{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+  .dbox{background:var(--surface);border-radius:var(--r);padding:20px;border-left:4px solid var(--a4)}
+  .dspk{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--a4);margin-bottom:8px}
+  .dtxt{font-size:15px;line-height:1.65}
+  .cgrid{display:flex;flex-direction:column;gap:10px}
+  .cbtn{background:var(--card);border:2px solid rgba(255,255,255,.08);border-radius:var(--rs);padding:14px 16px;color:var(--text);font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;cursor:pointer;text-align:left;transition:border-color .2s,background .2s,transform .15s;line-height:1.4;display:flex;align-items:flex-start;gap:10px}
+  .cbtn:hover:not(:disabled){border-color:rgba(77,150,255,.5);background:rgba(77,150,255,.08);transform:translateX(4px)}
+  .cbtn.correct{border-color:var(--a3);background:rgba(107,203,119,.1)}
+  .cbtn.wrong{border-color:var(--a1);background:rgba(255,107,107,.1)}
+  .cbtn:disabled{cursor:default}
+  .cletter{width:24px;height:24px;border-radius:6px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;margin-top:1px}
+  .fbbox{background:var(--card);border-radius:var(--r);padding:20px;display:none}
+  .fbbox.show{display:block}
+  .fbicon{font-size:32px;margin-bottom:8px}
+  .fbtitle{font-size:17px;font-weight:800;margin-bottom:6px}
+  .fbtext{font-size:14px;color:var(--muted);line-height:1.6}
+  .nextbtn{background:linear-gradient(135deg,var(--a4),var(--a5));color:#fff;border:none;padding:16px 32px;border-radius:999px;font-size:16px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;width:100%;transition:opacity .15s,transform .15s;display:none;margin-top:4px}
+  .nextbtn.show{display:block}
+  .nextbtn:hover{opacity:.9;transform:translateY(-1px)}
+
+  /* RESULT */
+  #sr { align-items:center; justify-content:center; text-align:center; padding:40px 24px;
+    background:radial-gradient(ellipse at 50% 30%,#0a2040 0%,var(--bg) 60%); }
+  .rbw{position:relative;margin-bottom:24px}
+  .rbadge{font-size:80px;animation:float 3s ease-in-out infinite;display:block}
+  .rstar{position:absolute;top:-8px;right:-8px;font-size:28px;animation:spin 4s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .rtitle{font-size:28px;font-weight:900;margin-bottom:8px}
+  .rsub{font-size:15px;color:var(--muted);margin-bottom:32px;line-height:1.5;max-width:320px}
+  .rsc{background:var(--card);border-radius:var(--r);padding:24px 40px;margin-bottom:32px;display:inline-block}
+  .rnum{font-size:52px;font-weight:900;line-height:1}
+  .rlbl{font-size:13px;color:var(--muted);margin-top:4px}
+  .rtip{background:var(--surface);border-radius:var(--r);padding:16px 20px;max-width:400px;margin:0 auto 32px;text-align:left;border-left:4px solid var(--a2)}
+  .tlbl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--a2);margin-bottom:6px}
+  .ttxt{font-size:14px;line-height:1.6;color:var(--muted)}
+  .ract{display:flex;flex-direction:column;gap:10px;max-width:320px;margin:0 auto}
+  .btns{background:rgba(255,255,255,.08);color:var(--text);border:2px solid rgba(255,255,255,.12);padding:14px 32px;border-radius:999px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;transition:background .15s}
+  .btns:hover{background:rgba(255,255,255,.14)}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--surface);border-radius:999px;padding:12px 24px;font-size:14px;font-weight:700;box-shadow:0 8px 32px rgba(0,0,0,.5);transition:transform .3s ease;z-index:100;white-space:nowrap;border:1px solid rgba(255,255,255,.1)}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div id="si" class="screen active">
+  <div class="stars"></div>
+  <div style="position:relative;z-index:1">
+    <div class="ibadge">🛡️</div>
+    <div class="ititle">CyberHerói</div>
+    <div class="isub">Treinamento de Conscientização em Cybersecurity</div>
+    <p class="idesc">Enfrente ameaças reais em missões interativas. Aprenda a se proteger e proteger sua empresa.</p>
+    <div class="chips">
+      <div class="chip" style="background:rgba(77,150,255,.15);color:#4d96ff">🎣 Phishing</div>
+      <div class="chip" style="background:rgba(255,107,107,.15);color:#ff6b6b">🎭 Eng. Social</div>
+      <div class="chip" style="background:rgba(107,203,119,.15);color:#6bcb77">🔑 Senhas</div>
+      <div class="chip" style="background:rgba(255,217,61,.15);color:#ffd93d">📋 LGPD</div>
+    </div>
+    <button class="btnp" onclick="showMap()">Começar Missões 🚀</button>
+  </div>
+</div>
+
+<!-- MAP -->
+<div id="sm" class="screen">
+  <div class="mh">
+    <div class="mt">🗺️ Mapa de Missões</div>
+    <div class="xpw">
+      <div class="xpl">XP Total</div>
+      <div class="xpbg"><div class="xpf" id="xpf" style="width:0%"></div></div>
+      <div class="xpc" id="xpc">0 / 400 XP</div>
+    </div>
+  </div>
+  <div class="mgrid" id="mgrid"></div>
+</div>
+
+<!-- STORY -->
+<div id="ss" class="screen">
+  <div class="sh">
+    <button class="backbtn" onclick="showMap()">←</button>
+    <div class="smi">
+      <div class="smt" id="stit"></div>
+      <div class="sms" id="ssub"></div>
+    </div>
+    <div class="spw">
+      <div style="font-size:11px;color:var(--muted);text-align:right;margin-bottom:4px" id="spc"></div>
+      <div class="spb"><div class="spf" id="spf" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="scene" id="sscene"></div>
+</div>
+
+<!-- RESULT -->
+<div id="sr" class="screen">
+  <div class="rbw">
+    <span class="rbadge" id="rbadge">🏆</span>
+    <span class="rstar">⭐</span>
+  </div>
+  <div class="rtitle" id="rtitle">Missão Concluída!</div>
+  <p class="rsub" id="rsub"></p>
+  <div class="rsc">
+    <div class="rnum" id="rnum">0</div>
+    <div class="rlbl">pontos ganhos</div>
+  </div>
+  <div class="rtip">
+    <div class="tlbl">💡 Dica de Ouro</div>
+    <div class="ttxt" id="rtip"></div>
+  </div>
+  <div class="ract">
+    <button class="btnp" onclick="showMap()">🗺️ Voltar ao Mapa</button>
+    <button class="btns" id="nmbtn">Próxima Missão →</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const M = [
+  { id:0, title:"🎣 Pescaria Suspeita", theme:"Phishing", desc:"Um e-mail chegou. Parece legítimo… ou será que não?", icon:"🎣", cls:"m1", ac:"#4d96ff", xp:100,
+    steps:[
+      { type:"story", emoji:"📧", ctx:"Segunda-feira, 9h da manhã", spk:"Narrador",
+        txt:"Você acabou de chegar ao trabalho e abriu o e-mail. Uma mensagem do 'suporte@bancoseguro-brasil.info' pede que você clique em um link urgente para evitar o bloqueio da sua conta.", nl:"Ver o e-mail →" },
+      { type:"choice", emoji:"🤔", ctx:"O e-mail diz:", spk:"E-mail suspeito",
+        txt:"⚠️ URGENTE: Sua conta será bloqueada em 24h! Clique AQUI para verificar seus dados imediatamente. Caso não confirme, perderá acesso permanentemente.",
+        choices:[
+          {l:"Clicar no link — preciso resolver isso rápido!",c:false},
+          {l:"Verificar o remetente e o domínio antes de qualquer ação.",c:true},
+          {l:"Encaminhar para um colega para ele resolver.",c:false},
+          {l:"Responder o e-mail pedindo mais informações.",c:false}
+        ],
+        fb:{ ok:{i:"✅",t:"Decisão certa!",d:"Excelente! O domínio 'bancoseguro-brasil.info' não é oficial. Bancos legítimos usam domínios verificados. Sempre confira o remetente completo."},
+             no:{i:"❌",t:"Atenção!",d:"Cair nessa é um erro comum! E-mails urgentes que pedem ação imediata são o principal sinal de phishing."} } },
+      { type:"choice", emoji:"🔍", ctx:"Você investigou o e-mail", spk:"Narrador",
+        txt:"Você passou o mouse sobre o link sem clicar. A URL mostrada é 'http://acesso-banco.ru/login'. O que você faz agora?",
+        choices:[
+          {l:"Reportar o e-mail como phishing para a equipe de TI/segurança.",c:true},
+          {l:"Abrir o link em outra aba para verificar se é real.",c:false},
+          {l:"Deletar o e-mail e não fazer nada.",c:false},
+          {l:"Ligar para o número de telefone no e-mail.",c:false}
+        ],
+        fb:{ ok:{i:"🏆",t:"Herói da segurança!",d:"Perfeito! Reportar é a ação mais importante — ajuda a proteger toda a empresa e permite rastrear a ameaça."},
+             no:{i:"💡",t:"Quase lá!",d:"Deletar ou investigar sozinho não é suficiente. Reportar ao time de TI permite bloquear o ataque para todos."} } }
+    ],
+    tip:"Sempre verifique: remetente completo, domínio da URL e se há urgência artificial. Esses são os 3 sinais clássicos de phishing."
+  },
+  { id:1, title:"🎭 O Engenheiro Social", theme:"Eng. Social", desc:"Alguém quer muito acesso ao sistema. Você vai deixar?", icon:"🎭", cls:"m2", ac:"#ff6b6b", xp:100,
+    steps:[
+      { type:"story", emoji:"📞", ctx:"Telefone toca na sua mesa", spk:"Narrador",
+        txt:"Um homem se identifica como 'Carlos, da TI central'. Ele diz que há um problema crítico no servidor e precisa do seu usuário e senha AGORA para resolver antes que o sistema caia.", nl:"Ouvir o pedido →" },
+      { type:"choice", emoji:"☎️", ctx:"Carlos diz:", spk:"Carlos (TI?)",
+        txt:"\"Olha, eu sei que é incomum, mas é uma emergência. O gerente autorizou. Se você não me passar agora, o sistema todo cai e vai ser culpa sua. Pode me passar seu login?\"",
+        choices:[
+          {l:"Passar as credenciais — ele disse que o gerente autorizou.",c:false},
+          {l:"Pedir o número de chamado e verificar com o gerente por canal oficial.",c:true},
+          {l:"Passar só o usuário, mas não a senha.",c:false},
+          {l:"Ficar em silêncio sem responder.",c:false}
+        ],
+        fb:{ ok:{i:"✅",t:"Ótimo instinto!",d:"Perfeito! Nenhuma empresa legítima pede senha por telefone. Verificar por canal oficial é sempre o procedimento correto."},
+             no:{i:"❌",t:"Cuidado!",d:"Engenharia social explora urgência, autoridade e pressão. Nenhuma TI legítima pede sua senha — ela tem ferramentas para agir sem isso."} } },
+      { type:"choice", emoji:"🚨", ctx:"Carlos insiste...", spk:"Carlos (TI?)",
+        txt:"\"Tá bom, não precisa da senha. Mas me diz: qual sistema vocês usam para dados dos clientes? E qual é o nome do servidor de backup?\"",
+        choices:[
+          {l:"Responder — não é senha, é só informação técnica.",c:false},
+          {l:"Encerrar a ligação e reportar a tentativa ao time de segurança.",c:true},
+          {l:"Perguntar por que ele não tem essa info sendo da TI.",c:false},
+          {l:"Consultar um colega antes de responder.",c:false}
+        ],
+        fb:{ ok:{i:"🛡️",t:"Missão protegida!",d:"Excelente! Informações sobre sistemas e infraestrutura são dados sensíveis. Atacantes as usam para planejar invasões. Reportar é essencial!"},
+             no:{i:"💡",t:"Atenção!",d:"Informação técnica também é sensível! O atacante pode usar o nome do sistema para lançar ataques direcionados. Reporte sempre."} } }
+    ],
+    tip:"Engenharia social usa urgência, autoridade e pressão emocional. Nunca compartilhe credenciais ou informações sensíveis por telefone sem verificar a identidade por canal oficial."
+  },
+  { id:2, title:"🔑 A Fortaleza de Senhas", theme:"Senhas & Auth", desc:"Sua senha é forte o suficiente para resistir a um ataque?", icon:"🔑", cls:"m3", ac:"#6bcb77", xp:100,
+    steps:[
+      { type:"story", emoji:"🏰", ctx:"Você precisa criar uma senha nova", spk:"Sistema",
+        txt:"O sistema pede que você crie uma nova senha. Cada escolha define o nível de proteção da sua conta — e dos dados da empresa.", nl:"Escolher senha →" },
+      { type:"choice", emoji:"🔐", ctx:"Qual senha você escolhe?", spk:"Desafio",
+        txt:"Você precisa criar uma senha para o sistema corporativo. Qual dessas é a mais segura?",
+        choices:[
+          {l:"senha123 — fácil de lembrar!",c:false},
+          {l:"Maria@1985 — meu nome e ano de nascimento.",c:false},
+          {l:"Gato!Roxo#Correndo$Rua — frase-senha com símbolos.",c:true},
+          {l:"xK9$mP — curta mas complexa.",c:false}
+        ],
+        fb:{ ok:{i:"🏆",t:"Escolha perfeita!",d:"Frases-senha são o melhor dos dois mundos: fáceis de lembrar e difíceis de quebrar. 'Gato!Roxo#Correndo$Rua' levaria séculos por força bruta."},
+             no:{i:"❌",t:"Vulnerável!",d:"Senhas curtas ou baseadas em dados pessoais são as primeiras testadas em ataques. Frases longas com símbolos são muito mais seguras."} } },
+      { type:"choice", emoji:"📱", ctx:"O sistema oferece uma opção extra", spk:"Sistema de Segurança",
+        txt:"O sistema pergunta se você deseja ativar o 2FA (Autenticação em Dois Fatores). Você receberá um código no celular a cada login. O que você faz?",
+        choices:[
+          {l:"Ativar o 2FA — segurança extra nunca é demais.",c:true},
+          {l:"Pular — fica chato ficar digitando código.",c:false},
+          {l:"Deixar para configurar depois (e esquecer).",c:false},
+          {l:"Perguntar se é obrigatório antes de decidir.",c:false}
+        ],
+        fb:{ ok:{i:"🛡️",t:"Decisão sábia!",d:"2FA é uma das proteções mais eficazes. Mesmo que alguém descubra sua senha, sem o segundo fator não consegue entrar. Sempre ative!"},
+             no:{i:"💡",t:"Vale muito a pena!",d:"O 2FA bloqueia 99.9% dos ataques automatizados. O pequeno inconveniente de um código protege dados valiosos da empresa."} } }
+    ],
+    tip:"Use frases-senha longas com símbolos, ative o 2FA em todos os sistemas e nunca reutilize a mesma senha. Um gerenciador de senhas facilita muito!"
+  },
+  { id:3, title:"📋 Guardiões da LGPD", theme:"LGPD & Dados", desc:"Como você lida com dados pessoais no dia a dia?", icon:"📋", cls:"m4", ac:"#ffd93d", xp:100,
+    steps:[
+      { type:"story", emoji:"📊", ctx:"Reunião com cliente", spk:"Narrador",
+        txt:"Um cliente envia uma planilha com nome, CPF, e-mail e telefone de 200 funcionários para uma pesquisa interna. Esses são dados pessoais protegidos pela LGPD.", nl:"Receber os dados →" },
+      { type:"choice", emoji:"💾", ctx:"Você recebeu a planilha", spk:"Situação",
+        txt:"Você precisará usar esses dados por 30 dias para o projeto. Qual é a forma correta de armazená-los?",
+        choices:[
+          {l:"No Google Drive pessoal — mais fácil de acessar.",c:false},
+          {l:"No servidor seguro da empresa, com acesso restrito aos envolvidos.",c:true},
+          {l:"No e-mail — encaminhar para a equipe quando precisar.",c:false},
+          {l:"No pen-drive na gaveta — offline é mais seguro.",c:false}
+        ],
+        fb:{ ok:{i:"✅",t:"Correto!",d:"Dados pessoais devem ficar em ambientes corporativos controlados, com acesso mínimo necessário. Drives pessoais e e-mails criam riscos de vazamento e violam a LGPD."},
+             no:{i:"❌",t:"Violação em potencial!",d:"Armazenar dados em locais não autorizados é uma das principais violações da LGPD — mesmo sem má intenção. A empresa pode responder com multas milionárias."} } },
+      { type:"choice", emoji:"🗑️", ctx:"30 dias depois — projeto finalizado", spk:"Narrador",
+        txt:"O projeto acabou. Os dados dos 200 funcionários ainda estão no servidor. O que você deve fazer com eles?",
+        choices:[
+          {l:"Deixar guardado — podem ser úteis no futuro.",c:false},
+          {l:"Solicitar a exclusão segura, conforme a finalidade original dos dados.",c:true},
+          {l:"Mover para um arquivo histórico da empresa.",c:false},
+          {l:"Perguntar ao cliente se ele quer uma cópia antes de deletar.",c:false}
+        ],
+        fb:{ ok:{i:"🏆",t:"Guardiã da LGPD!",d:"Perfeito! A LGPD define que dados pessoais só devem ser mantidos pelo tempo necessário. Após o prazo, devem ser eliminados com segurança — é um direito dos titulares."},
+             no:{i:"💡",t:"Atenção à finalidade!",d:"Guardar dados além do necessário é infração à LGPD. O princípio da necessidade diz que você só pode manter dados pelo tempo que justificou a coleta."} } }
+    ],
+    tip:"LGPD na prática: colete só o necessário, armazene com segurança, restrinja o acesso e elimine quando não precisar mais. Dados pessoais são responsabilidade de quem os trata."
+  }
+];
+
+let S = { done:[], scores:{}, cur:null, step:0, pts:0, xp:0 };
+
+function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo(0,0); }
+
+function showMap(){
+  const g=document.getElementById('mgrid'); g.innerHTML='';
+  document.getElementById('xpf').style.width=(S.xp/400*100)+'%';
+  document.getElementById('xpc').textContent=S.xp+' / 400 XP';
+  M.forEach((m,i)=>{
+    const done=S.done.includes(m.id), locked=i>0&&!S.done.includes(M[i-1].id);
+    const d=document.createElement('div');
+    d.className=`mcard ${m.cls} ${done?'done':''} ${locked?'locked':'unlocked'}`;
+    d.innerHTML=`<div class="micon">${m.icon}</div><div class="minfo"><div class="mnum">MISSÃO ${i+1}</div><div class="mname">${m.title}</div><div class="mdesc">${m.desc}</div><div class="mmeta"><span class="mtag">${m.theme}</span><span class="mtag pxp">+${m.xp} XP</span>${done?'<span style="font-size:12px;color:#6bcb77;font-weight:700">✓ Concluída</span>':''}</div></div><div>${locked?'🔒':done?'<span style="font-size:22px">✅</span>':'<div class="marr">›</div>'}</div>`;
+    if(!locked) d.addEventListener('click',()=>startM(m.id));
+    g.appendChild(d);
+  });
+  show('sm');
+}
+
+function startM(id){
+  const m=M[id]; S.cur=id; S.step=0; S.pts=0;
+  document.getElementById('stit').textContent=m.title;
+  document.getElementById('ssub').textContent=m.theme;
+  document.getElementById('spf').style.background=`linear-gradient(90deg,${m.ac},${m.ac}88)`;
+  renderStep(); show('ss');
+}
+
+function renderStep(){
+  const m=M[S.cur], step=m.steps[S.step], total=m.steps.length;
+  document.getElementById('spf').style.width=(S.step/total*100)+'%';
+  document.getElementById('spc').textContent=(S.step+1)+' / '+total;
+  const sc=document.getElementById('sscene');
+  if(step.type==='story'){
+    sc.innerHTML=`<div class="sill"><span class="semoji">${step.emoji}</span><span class="sctx">${step.ctx}</span></div><div class="dbox" style="border-color:${m.ac}"><div class="dspk" style="color:${m.ac}">${step.spk}</div><div class="dtxt">${step.txt}</div></div><button class="nextbtn show" style="background:linear-gradient(135deg,${m.ac},${m.ac}99)" onclick="nextStep()">${step.nl}</button>`;
+  } else {
+    const ls=['A','B','C','D'];
+    const ch=step.choices.map((c,i)=>`<button class="cbtn" onclick="pick(${i})" data-c="${c.c}"><span class="cletter">${ls[i]}</span><span>${c.l}</span></button>`).join('');
+    sc.innerHTML=`<div class="sill"><span class="semoji">${step.emoji}</span><span class="sctx">${step.ctx}</span></div><div class="dbox" style="border-color:${m.ac}"><div class="dspk" style="color:${m.ac}">${step.spk}</div><div class="dtxt">${step.txt}</div></div><div class="cgrid">${ch}</div><div class="fbbox" id="fb"><div class="fbicon" id="fbi"></div><div class="fbtitle" id="fbt"></div><div class="fbtext" id="fbd"></div></div><button class="nextbtn" id="nb" style="background:linear-gradient(135deg,${m.ac},${m.ac}99)" onclick="nextStep()">Continuar →</button>`;
+  }
+}
+
+function pick(i){
+  const m=M[S.cur], step=m.steps[S.step], ch=step.choices[i];
+  document.querySelectorAll('.cbtn').forEach(b=>b.disabled=true);
+  const b=document.querySelectorAll('.cbtn')[i];
+  if(ch.c){ b.classList.add('correct'); S.pts+=50; showFb(step.fb.ok); toast('✨ +50 pontos!'); }
+  else { b.classList.add('wrong'); document.querySelectorAll('.cbtn').forEach(x=>{if(x.dataset.c==='true')x.classList.add('correct')}); showFb(step.fb.no); }
+  document.getElementById('nb').classList.add('show');
+}
+
+function showFb(f){ const b=document.getElementById('fb'); document.getElementById('fbi').textContent=f.i; document.getElementById('fbt').textContent=f.t; document.getElementById('fbd').textContent=f.d; b.classList.add('show'); }
+
+function nextStep(){
+  const m=M[S.cur]; S.step++;
+  if(S.step>=m.steps.length) finish(); else renderStep();
+}
+
+function finish(){
+  const m=M[S.cur], id=S.cur;
+  if(!S.done.includes(id)){ S.done.push(id); S.xp+=m.xp; }
+  S.scores[id]=Math.max(S.scores[id]||0,S.pts);
+  const pct=S.pts/100;
+  let badge,title,sub;
+  if(pct>=1){badge='🏆';title='Perfeito!';sub='Você acertou tudo! Verdadeira guardiã cibernética!';}
+  else if(pct>=.5){badge='⭐';title='Boa defesa!';sub='Você se saiu bem, mas revise os pontos que errou.';}
+  else{badge='🛡️';title='Continue treinando!';sub='A prática leva à perfeição. Tente novamente!';}
+  document.getElementById('rbadge').textContent=badge;
+  document.getElementById('rtitle').textContent=title;
+  document.getElementById('rsub').textContent=sub;
+  document.getElementById('rnum').textContent=S.pts;
+  document.getElementById('rtip').textContent=m.tip;
+  const nb=document.getElementById('nmbtn'), ni=id+1;
+  if(ni<M.length){ nb.style.display=''; nb.onclick=()=>startM(ni); nb.textContent=M[ni].title+' →'; } else { nb.style.display='none'; }
+  show('sr');
+}
+
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
+
+show('si');
+</script>
+</body>
+</html>
